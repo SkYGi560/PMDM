@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">agenda</string>
     <string name="holamundo">Hello World!</string>
+=======
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">agenda</string>
+    <string name="holamundo">Hello World!</string>
+>>>>>>> b89b961 (Ejercicios basicos aplicaciones2)
 </resources>

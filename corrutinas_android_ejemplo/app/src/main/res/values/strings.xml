@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">EjemploCorrutinas</string>
+    <string name="pausar">Pausar</string>
+    <string name="empezar">Empezar</string>
+    <string name="reiniciar">Reiniciar</string>
+    <string name="carrera_procesos">Carrera Procesos</string>
+</resources>

@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Material 3 Compose</title>
+    
+    <!-- Google Fonts & Icons - LOCAL -->
+    <link href="assets/fonts/fonts-local.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fonts/material-symbols-local.css" />
+    
+    <!-- Tailwind CSS - LOCAL -->
+    <script src="assets/js/tailwind.js"></script>
+    
+    <!-- PrismJS for Syntax Highlighting - LOCAL -->
+    <link href="assets/css/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="assets/js/prism.min.js"></script>
+    <script src="assets/js/prism-kotlin.min.js"></script>
+
+<script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                        mono: ['Roboto Mono', 'monospace'],
+                    },
+                    colors: {
+                        m3: {
+                            primary: '#6750A4',
+                            onPrimary: '#FFFFFF',
+                            primaryContainer: '#EADDFF',
+                            onPrimaryContainer: '#21005D',
+                            secondary: '#625B71',
+                            background: '#FFFBFE',
+                            surface: '#FFFBFE',
+                            outline: '#79747E',
+                            surfaceVariant: '#E7E0EC',
+                            onSurfaceVariant: '#49454F',
+                            error: '#B3261E',
+                            onError: '#FFFFFF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa; 
+        }
+
+        /* Ripple Effect Simulation */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+            transform: translate3d(0, 0, 0);
+        }
+        .ripple:after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #6750a4 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform .5s, opacity 1s;
+        }
+        .ripple:active:after {
+            transform: scale(0, 0);
+            opacity: 0.2;
+            transition: 0s;
+        }
+        
+        /* M3 Specific styles for web simulation */
+        .m3-card {
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
+            transition: box-shadow 0.2s ease;
+        }
+        .m3-card:hover {
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
+        }
+        .m3-elevated-button {
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
+        }
+        
+        .m3-switch input:checked + div {
+            background-color: #6750A4;
+            border-color: #6750A4;
+        }
+        .m3-switch input:checked + div .thumb {
+            transform: translateX(20px);
+            background-color: #FFFFFF;
+            width: 24px;
+            height: 24px;
+        }
+        .m3-switch input:checked + div .icon-check {
+            opacity: 1;
+        }
+
+        /* Slider Styles */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #6750A4;
+            margin-top: -8px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #E7E0EC;
+            border-radius: 2px;
+        }
+        input[type=range]:focus::-webkit-slider-runnable-track {
+            background: #E7E0EC;
+        }
+
+        pre {
+            border-radius: 12px !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFCF4] text-[#1C1B1F] h-screen flex overflow-hidden selection:bg-m3-primaryContainer selection:text-m3-onPrimaryContainer">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 flex-shrink-0 bg-[#F3EDF7] border-r border-[#CAC4D0] flex flex-col h-full transition-transform duration-300 absolute md:relative z-20 -translate-x-full md:translate-x-0" id="sidebar">
+        <div class="p-6 flex items-center gap-3 border-b border-[#E7E0EC]">
+            <span class="material-symbols-rounded text-m3-primary text-3xl">widgets</span>
+            <h1 class="font-bold text-xl text-[#1D1B20]">M3 Catalog</h1>
+        </div>
+        
+        <div class="overflow-y-auto flex-1 py-4 px-3 space-y-1" id="componentList">
+            <!-- JS populates this -->
+        </div>
+
+        <div class="p-4 text-xs text-gray-500 text-center border-t border-[#E7E0EC]">
+            Basado en Androidx Compose Material3
+        </div>
+    </aside>
+
+    <!-- Mobile Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        <!-- Top Bar -->
+        <header class="h-16 bg-[#F3EDF7] flex items-center px-4 justify-between border-b border-[#CAC4D0]">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-full hover:bg-[#E7E0EC] ripple">
+                    <span class="material-symbols-rounded">menu</span>
+                </button>
+                <h2 id="pageTitle" class="text-lg font-medium">Bienvenido</h2>
+            </div>
+            <a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary" target="_blank" class="text-sm text-m3-primary hover:underline flex items-center gap-1">
+                Docs Oficiales <span class="material-symbols-rounded text-sm">open_in_new</span>
+            </a>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8" id="contentArea">
+                
+                <!-- Intro State -->
+                <div class="col-span-1 lg:col-span-2 text-center py-20">
+                    <span class="material-symbols-rounded text-6xl text-m3-primary mb-4">android</span>
+                    <h3 class="text-2xl font-medium mb-2">Selecciona un componente</h3>
+                    <p class="text-gray-600">Explora la implementación visual y obtén el código Compose al instante.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#322F35] text-[#F4EFF4] px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+            <span class="material-symbols-rounded text-green-400">check_circle</span>
+            Código copiado al portapapeles
+        </div>
+    </main>
+
+    <script>
+        // --- DATA SOURCE: Based on Android Material 3 Samples ---
+        const components = [
+            // --- STRUCTURE & LAYOUTS ---
+            {
+                id: 'scaffold',
+                name: 'Scaffold',
+                icon: 'dashboard',
+                description: 'Layout de alto nivel que implementa la estructura visual básica de Material Design.',
+                webPreview: `
+                    <div class="w-full max-w-xs h-64 border border-gray-300 rounded-lg flex flex-col bg-[#FDFCF4] overflow-hidden relative shadow-lg">
+                        <!-- Top Bar -->
+                        <div class="h-10 bg-[#F3EDF7] border-b border-gray-200 flex items-center px-3 gap-2 text-[#49454F]">
+                            <span class="material-symbols-rounded text-base">menu</span>
+                            <span class="text-xs font-medium">My App</span>
+                        </div>
+                        <!-- Content -->
+                        <div class="flex-1 p-4 flex items-center justify-center text-xs text-gray-400">
+                            Inner Padding Content
+                        </div>
+                        <!-- FAB -->
+                        <div class="absolute bottom-12 right-4 w-10 h-10 bg-m3-primaryContainer text-m3-onPrimaryContainer rounded-xl flex items-center justify-center shadow-md">
+                             <span class="material-symbols-rounded text-lg">add</span>
+                        </div>
+                        <!-- Bottom Bar -->
+                        <div class="h-10 bg-[#F3EDF7] border-t border-gray-200 flex items-center justify-around px-2 text-[#49454F]">
+                            <span class="material-symbols-rounded text-lg">home</span>
+                            <span class="material-symbols-rounded text-lg">search</span>
+                            <span class="material-symbols-rounded text-lg">person</span>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `Scaffold(
+    topBar = {
+        TopAppBar(title = { Text("My App") })
+    },
+    bottomBar = {
+        NavigationBar {
+            NavigationBarItem(
+                icon = { Icon(Icons.Filled.Home, "Home") },
+                selected = true,
+                onClick = { }
+            )
+            // ... more items
+        }
+    },
+    floatingActionButton = {
+        FloatingActionButton(onClick = { }) {
+            Icon(Icons.Filled.Add, "Add")
+        }
+    }
+) { innerPadding ->
+    Box(modifier = Modifier.padding(innerPadding)) {
+        Text("Body content")
+    }
+}`
+            },
+            {
+                id: 'drawer',
+                name: 'Navigation Drawer',
+                icon: 'side_navigation',
+                description: 'Panel de navegación que se desliza desde el lateral.',
+                webPreview: `
+                    <div class="relative w-full max-w-xs h-64 bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                        <!-- Background Content -->
+                        <div class="p-4 opacity-40">
+                            <div class="h-4 bg-gray-400 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-gray-400 rounded w-full mb-2"></div>
+                        </div>
+                        <!-- Scrim -->
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <!-- Drawer Panel -->
+                        <div class="absolute top-0 left-0 h-full w-48 bg-[#ECE6F0] shadow-xl p-4 flex flex-col gap-2 rounded-r-2xl">
+                             <div class="text-lg font-medium text-[#1D1B20] mb-4 px-2">Menu</div>
+                             <div class="bg-m3-secondaryContainer text-m3-onSecondaryContainer px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                                <span class="material-symbols-rounded text-base">inbox</span> Inbox
+                             </div>
+                             <div class="hover:bg-black/5 text-[#49454F] px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                                <span class="material-symbols-rounded text-base">send</span> Sent
+                             </div>
+                             <div class="hover:bg-black/5 text-[#49454F] px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                                <span class="material-symbols-rounded text-base">favorite</span> Favorites
+                             </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+val scope = rememberCoroutineScope()
+
+ModalNavigationDrawer(
+    drawerState = drawerState,
+    drawerContent = {
+        ModalDrawerSheet {
+            Text("Menu", modifier = Modifier.padding(16.dp))
+            HorizontalDivider()
+            NavigationDrawerItem(
+                label = { Text(text = "Inbox") },
+                selected = true,
+                onClick = { /* navigate */ }
+            )
+            // ... more items
+        }
+    }
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("My App") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        scope.launch { drawerState.open() }
+                    }) { Icon(Icons.Filled.Menu, null) }
+                }
+            )
+        }
+    ) { contentPadding ->
+        // Screen content
+    }
+}`
+            },
+            {
+                id: 'lazycolumn',
+                name: 'Lazy Column (List)',
+                icon: 'format_list_bulleted',
+                description: 'Lista vertical eficiente que carga elementos bajo demanda. Soporta animaciones y claves para rendimiento.',
+                webPreview: `
+                    <div class="w-full max-w-xs h-64 bg-[#FDFCF4] rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+                         <!-- Header -->
+                         <div class="bg-[#F3EDF7] p-3 border-b border-gray-200 font-medium text-sm flex justify-between items-center">
+                            <span>Datos</span>
+                            <span class="material-symbols-rounded text-m3-primary text-sm cursor-pointer">refresh</span>
+                         </div>
+                         <!-- Scrollable Area -->
+                         <div class="overflow-y-auto flex-1 p-2 space-y-2 scrollbar-thin">
+                            <!-- Item 1 -->
+                            <div class="bg-[#EADDFF] p-3 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-all">
+                                <span class="text-sm font-medium text-[#21005D]">Dato 1234</span>
+                                <span class="material-symbols-rounded text-[#21005D] text-sm">delete</span>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="bg-[#EADDFF] p-3 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-all">
+                                <span class="text-sm font-medium text-[#21005D]">Dato 5678</span>
+                                <span class="material-symbols-rounded text-[#21005D] text-sm">delete</span>
+                            </div>
+                             <!-- Item 3 -->
+                            <div class="bg-[#EADDFF] p-3 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-all">
+                                <span class="text-sm font-medium text-[#21005D]">Dato 9012</span>
+                                <span class="material-symbols-rounded text-[#21005D] text-sm">delete</span>
+                            </div>
+                             <!-- Mock items -->
+                            <div class="bg-[#EADDFF] p-3 rounded-lg shadow-sm opacity-50"><div class="h-4 bg-[#21005D]/20 w-24 rounded"></div></div>
+                         </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Definición de Datos
+data class Dato(val id: String, val texto: String)
+
+// 2. LazyColumn con Animaciones y Estado
+@Composable
+fun DatosEnColumnaAnimada(
+    datosState: List<Dato>,
+    onClickDato: (Dato) -> Unit
+) {
+    LazyColumn(
+        state = rememberLazyListState(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = datosState,
+            key = { it.id } // Clave única para optimización y animación
+        ) { dato ->
+            ElevatedCard(
+                modifier = Modifier
+                    .animateItem() // Animación de cambios (reordenar/borrar)
+                    .fillMaxWidth()
+                    .clickable { onClickDato(dato) },
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Text(
+                    text = dato.texto,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+}`
+            },
+            {
+                id: 'lazygrid',
+                name: 'Lazy Grid',
+                icon: 'grid_view',
+                description: 'Cuadrícula vertical eficiente. Soporta celdas adaptativas y animaciones.',
+                webPreview: `
+                    <div class="w-full max-w-xs h-64 bg-[#FDFCF4] rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+                         <div class="bg-[#F3EDF7] p-3 border-b border-gray-200 font-medium text-sm flex justify-between items-center">
+                            <span>Galería</span>
+                            <span class="material-symbols-rounded text-m3-primary text-sm cursor-pointer">add</span>
+                         </div>
+                         <div class="overflow-y-auto flex-1 p-2 grid grid-cols-2 gap-2">
+                            <!-- Item 1 -->
+                            <div class="bg-white p-2 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center gap-1">
+                                <span class="material-symbols-rounded text-[#6750A4]">favorite</span>
+                                <span class="text-[10px] text-[#6750A4]">Dato 1</span>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="bg-white p-2 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center gap-1">
+                                <span class="material-symbols-rounded text-[#9C27B0]">ac_unit</span>
+                                <span class="text-[10px] text-[#9C27B0]">Dato 2</span>
+                            </div>
+                            <!-- Item 3 -->
+                            <div class="bg-white p-2 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center gap-1">
+                                <span class="material-symbols-rounded text-[#673AB7]">schedule</span>
+                                <span class="text-[10px] text-[#673AB7]">Dato 3</span>
+                            </div>
+                            <!-- Item 4 -->
+                            <div class="bg-white p-2 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center gap-1">
+                                <span class="material-symbols-rounded text-[#3F51B5]">cake</span>
+                                <span class="text-[10px] text-[#3F51B5]">Dato 4</span>
+                            </div>
+                         </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. LazyVerticalGrid Adaptativo
+@Composable
+fun DatosEnGridAnimado(
+    datosState: List<DatoGrid>,
+    onClickDato: (DatoGrid) -> Unit
+) {
+    LazyVerticalGrid(
+        // Columnas adaptativas (mínimo 100dp)
+        columns = GridCells.Adaptive(minSize = 100.dp),
+        state = rememberLazyGridState(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            count = datosState.size,
+            key = { index -> datosState[index].id }
+        ) { index ->
+            val dato = datosState[index]
+            ElevatedCard(
+                modifier = Modifier
+                    .animateItem() // Animación
+                    .clickable { onClickDato(dato) },
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        painter = painterResource(id = dato.idIcono),
+                        contentDescription = null,
+                        tint = dato.color
+                    )
+                    Text(
+                        text = dato.texto,
+                        color = dato.color,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    }
+}`
+            },
+
+            // --- EXISTING COMPONENTS ---
+            // 1. BUTTONS
+            {
+                id: 'buttons',
+                name: 'Buttons',
+                icon: 'smart_button',
+                description: 'Botones comunes para desencadenar acciones.',
+                webPreview: `
+                    <div class="flex flex-col gap-4 items-center justify-center p-4">
+                        <button class="ripple bg-m3-primary text-white px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md transition-all">
+                            Filled Button
+                        </button>
+                        <button class="ripple bg-m3-primaryContainer text-m3-onPrimaryContainer px-6 py-2.5 rounded-full font-medium hover:shadow transition-all">
+                            Tonal Button
+                        </button>
+                        <button class="ripple border border-m3-outline text-m3-primary px-6 py-2.5 rounded-full font-medium hover:bg-m3-surfaceVariant/30 transition-all">
+                            Outlined Button
+                        </button>
+                        <button class="ripple text-m3-primary px-6 py-2.5 rounded-full font-medium hover:bg-m3-surfaceVariant/30 transition-all">
+                            Text Button
+                        </button>
+                    </div>
+                `,
+                kotlinCode: `Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Button(onClick = { }) { Text("Filled Button") }
+    FilledTonalButton(onClick = { }) { Text("Tonal Button") }
+    OutlinedButton(onClick = { }) { Text("Outlined Button") }
+    TextButton(onClick = { }) { Text("Text Button") }
+}`
+            },
+            // 2. FABs
+            {
+                id: 'fab',
+                name: 'Floating Action Button',
+                icon: 'add_circle',
+                description: 'Botones de acción principal, incluyendo variantes extendidas.',
+                webPreview: `
+                    <div class="flex flex-col gap-6 items-center justify-center p-8">
+                        <button class="ripple w-14 h-14 bg-m3-primaryContainer text-m3-onPrimaryContainer rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center transition-all">
+                            <span class="material-symbols-rounded text-2xl">edit</span>
+                        </button>
+                        <button class="ripple px-6 py-4 bg-m3-primaryContainer text-m3-onPrimaryContainer rounded-2xl shadow-md hover:shadow-lg flex items-center gap-2 font-medium transition-all">
+                            <span class="material-symbols-rounded">navigation</span>
+                            <span>Extended FAB</span>
+                        </button>
+                    </div>
+                `,
+                kotlinCode: `// 1. Standard FAB
+FloatingActionButton(onClick = { }) {
+    Icon(Icons.Filled.Edit, contentDescription = "Edit")
+}
+
+// 2. Extended FAB
+ExtendedFloatingActionButton(
+    onClick = { },
+    icon = { Icon(Icons.Filled.Navigation, "Navigate") },
+    text = { Text("Extended FAB") },
+)`
+            },
+            // 3. ICON BUTTONS
+            {
+                id: 'iconbuttons',
+                name: 'Icon Buttons',
+                icon: 'ads_click',
+                description: 'Botones que contienen solo un icono.',
+                webPreview: `
+                    <div class="flex gap-6 items-center justify-center p-4">
+                        <button class="ripple w-10 h-10 rounded-full flex items-center justify-center text-[#49454F] hover:bg-[#1d1b2014]">
+                            <span class="material-symbols-rounded">settings</span>
+                        </button>
+                        <button class="ripple w-10 h-10 rounded-full flex items-center justify-center bg-m3-primary text-white shadow hover:shadow-md">
+                            <span class="material-symbols-rounded">favorite</span>
+                        </button>
+                        <button class="ripple w-10 h-10 rounded-full flex items-center justify-center bg-m3-primaryContainer text-m3-onPrimaryContainer hover:shadow">
+                            <span class="material-symbols-rounded">share</span>
+                        </button>
+                        <button class="ripple w-10 h-10 rounded-full flex items-center justify-center border border-m3-outline text-m3-primary hover:bg-m3-surfaceVariant/30">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+                `,
+                kotlinCode: `Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    // Standard
+    IconButton(onClick = { }) {
+        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+    }
+    // Filled
+    FilledIconButton(onClick = { }) {
+        Icon(Icons.Filled.Favorite, contentDescription = "Favorite")
+    }
+    // Filled Tonal
+    FilledTonalIconButton(onClick = { }) {
+        Icon(Icons.Filled.Share, contentDescription = "Share")
+    }
+    // Outlined
+    OutlinedIconButton(onClick = { }) {
+        Icon(Icons.Outlined.Delete, contentDescription = "Delete")
+    }
+}`
+            },
+            // 4. APP BARS
+            {
+                id: 'appbars',
+                name: 'App Bars',
+                icon: 'web_asset',
+                description: 'Barras de aplicación superior e inferior.',
+                webPreview: `
+                    <div class="w-full flex flex-col gap-4 items-center">
+                        <!-- Top App Bar -->
+                        <div class="w-full bg-[#F3EDF7] h-16 flex items-center px-4 justify-between shadow-sm rounded-lg overflow-hidden">
+                             <div class="flex items-center gap-4">
+                                <span class="material-symbols-rounded text-[#1D1B20]">menu</span>
+                                <span class="text-xl font-normal text-[#1D1B20]">Page Title</span>
+                             </div>
+                             <div class="flex items-center gap-4 text-[#49454F]">
+                                <span class="material-symbols-rounded">attach_file</span>
+                                <span class="material-symbols-rounded">more_vert</span>
+                             </div>
+                        </div>
+                        
+                        <!-- Bottom App Bar -->
+                        <div class="w-full bg-[#F3EDF7] h-20 flex items-center px-4 justify-between shadow-inner rounded-lg overflow-hidden mt-4 relative">
+                             <div class="flex items-center gap-4 text-[#49454F]">
+                                <span class="material-symbols-rounded text-2xl">check_box</span>
+                                <span class="material-symbols-rounded text-2xl">edit</span>
+                                <span class="material-symbols-rounded text-2xl">mic</span>
+                                <span class="material-symbols-rounded text-2xl">image</span>
+                             </div>
+                             <button class="absolute right-4 top-[-14px] shadow-md bg-m3-primaryContainer text-m3-onPrimaryContainer w-14 h-14 rounded-2xl flex items-center justify-center">
+                                <span class="material-symbols-rounded text-2xl">add</span>
+                             </button>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Top App Bar
+TopAppBar(
+    title = { Text("Page Title") },
+    navigationIcon = {
+        IconButton(onClick = {}) { Icon(Icons.Filled.Menu, "Menu") }
+    },
+    actions = {
+        IconButton(onClick = {}) { Icon(Icons.Filled.MoreVert, "Options") }
+    }
+)
+
+// 2. Bottom App Bar
+BottomAppBar(
+    actions = {
+        IconButton(onClick = {}) { Icon(Icons.Filled.Check, "Check") }
+        IconButton(onClick = {}) { Icon(Icons.Filled.Edit, "Edit") }
+    },
+    floatingActionButton = {
+        FloatingActionButton(onClick = {}) {
+            Icon(Icons.Filled.Add, "Add")
+        }
+    }
+)`
+            },
+            // 5. PROGRESS
+            {
+                id: 'progress',
+                name: 'Progress Indicators',
+                icon: 'pending',
+                description: 'Indicadores de estado de carga circular y lineal.',
+                webPreview: `
+                    <div class="flex flex-col gap-8 items-center justify-center w-full p-4">
+                        <!-- Circular -->
+                        <div class="w-12 h-12 border-4 border-m3-primaryContainer border-t-m3-primary rounded-full animate-spin"></div>
+                        
+                        <!-- Linear -->
+                        <div class="w-full max-w-xs h-1 bg-m3-primaryContainer overflow-hidden rounded-full relative">
+                            <div class="absolute top-0 left-0 h-full w-1/2 bg-m3-primary animate-pulse"></div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // Circular
+    CircularProgressIndicator()
+    
+    Spacer(Modifier.height(16.dp))
+
+    // Linear
+    LinearProgressIndicator()
+}`
+            },
+            // 6. PULL TO REFRESH
+            {
+                id: 'pullrefresh',
+                name: 'Pull To Refresh',
+                icon: 'refresh',
+                description: 'Contenedor que permite refrescar contenido al deslizar.',
+                webPreview: `
+                    <div class="w-full max-w-xs h-48 bg-white border border-gray-200 rounded-lg relative overflow-hidden flex justify-center">
+                         <div class="absolute top-4 w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center z-10 text-m3-primary">
+                            <div class="w-5 h-5 border-2 border-m3-primaryContainer border-t-m3-primary rounded-full animate-spin"></div>
+                         </div>
+                         <div class="mt-16 w-full px-4 space-y-2 opacity-50">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-4 bg-gray-200 rounded w-full"></div>
+                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                         </div>
+                    </div>
+                `,
+                kotlinCode: `// Material 3 (1.3.0+) - PullToRefreshBox
+var isRefreshing by remember { mutableStateOf(false) }
+val state = rememberPullToRefreshState()
+
+PullToRefreshBox(
+    isRefreshing = isRefreshing,
+    onRefresh = { /* refresh logic */ },
+    state = state
+) {
+    LazyColumn {
+        items(50) { ListItem({ Text(text = "Item $it") }) }
+    }
+}`
+            },
+            // 7. BADGES
+            {
+                id: 'badge',
+                name: 'Badge',
+                icon: 'notification_important',
+                description: 'Notificaciones numéricas o puntos sobre iconos.',
+                webPreview: `
+                    <div class="flex gap-8 items-center justify-center p-4">
+                        <!-- Small Badge -->
+                        <div class="relative">
+                            <span class="material-symbols-rounded text-3xl text-[#49454F]">mail</span>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </div>
+                        
+                        <!-- Number Badge -->
+                        <div class="relative">
+                            <span class="material-symbols-rounded text-3xl text-[#49454F]">shopping_cart</span>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">8</span>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Small Badge (Dot)
+BadgedBox(
+    badge = { Badge() }
+) {
+    Icon(Icons.Filled.Mail, contentDescription = "Mail")
+}
+
+// 2. Number Badge
+BadgedBox(
+    badge = { 
+        Badge { Text("8") } 
+    }
+) {
+    Icon(Icons.Filled.ShoppingCart, contentDescription = "Cart")
+}`
+            },
+            // 8. MENUS
+            {
+                id: 'menus',
+                name: 'Menus & Dropdowns',
+                icon: 'menu_open',
+                description: 'Listas de opciones que aparecen temporalmente.',
+                webPreview: `
+                    <div class="relative border border-[#CAC4D0] bg-[#F3EDF7] p-2 rounded-md inline-block">
+                        <div class="flex items-center justify-between w-40 cursor-pointer text-[#1D1B20]">
+                            <span>Options</span>
+                            <span class="material-symbols-rounded">arrow_drop_down</span>
+                        </div>
+                        
+                        <!-- Simulación Dropdown abierto -->
+                        <div class="absolute top-full left-0 mt-1 w-48 bg-[#FDFCF4] rounded-md shadow-xl border border-[#E7E0EC] py-2 z-10">
+                            <div class="px-4 py-2 hover:bg-black/5 cursor-pointer flex items-center gap-3 text-[#1D1B20]">
+                                <span class="material-symbols-rounded text-sm">edit</span>
+                                <span class="text-sm">Edit</span>
+                            </div>
+                            <div class="px-4 py-2 hover:bg-black/5 cursor-pointer flex items-center gap-3 text-[#1D1B20]">
+                                <span class="material-symbols-rounded text-sm">settings</span>
+                                <span class="text-sm">Settings</span>
+                            </div>
+                            <div class="px-4 py-2 hover:bg-black/5 cursor-pointer flex items-center gap-3 text-[#1D1B20]">
+                                <span class="material-symbols-rounded text-sm">share</span>
+                                <span class="text-sm">Share</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `var expanded by remember { mutableStateOf(false) }
+
+Box {
+    IconButton(onClick = { expanded = true }) {
+        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+    }
+    
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+    ) {
+        DropdownMenuItem(
+            text = { Text("Edit") },
+            onClick = { /* Handle edit! */ },
+            leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+        )
+        DropdownMenuItem(
+            text = { Text("Settings") },
+            onClick = { /* Handle settings! */ },
+            leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) }
+        )
+    }
+}`
+            },
+            // 18. EXPOSED DROPDOWN MENU
+            {
+                id: 'exposeddropdown',
+                name: 'Exposed Dropdown Menu',
+                icon: 'arrow_drop_down_circle',
+                description: 'Menú desplegable integrado en un campo de texto (Select).',
+                webPreview: `
+                    <div class="w-full max-w-xs p-4 flex flex-col gap-4">
+                        <div class="relative">
+                            <div class="w-full border border-[#79747E] rounded-[4px] px-4 py-3 bg-transparent flex justify-between items-center cursor-pointer">
+                                <span class="text-[#1D1B20]">Opción A</span>
+                                <span class="material-symbols-rounded text-[#49454F]">arrow_drop_up</span>
+                            </div>
+                            <label class="absolute left-3 -top-2.5 bg-[#FDFCF4] px-1 text-xs text-[#49454F]">Selecciona</label>
+                            
+                            <!-- Dropdown List -->
+                            <div class="absolute top-full left-0 w-full mt-1 bg-[#FDFCF4] rounded-md shadow-lg border border-[#E7E0EC] py-2 z-10">
+                                <div class="px-4 py-3 bg-[#E8DEF8] text-[#1D1B20] font-medium">Opción A</div>
+                                <div class="px-4 py-3 hover:bg-black/5 text-[#1D1B20] cursor-pointer">Opción B</div>
+                                <div class="px-4 py-3 hover:bg-black/5 text-[#1D1B20] cursor-pointer">Opción C</div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `val options = listOf("Opción A", "Opción B", "Opción C")
+var expanded by remember { mutableStateOf(false) }
+var selectedOptionText by remember { mutableStateOf(options[0]) }
+
+ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded },
+) {
+    TextField(
+        modifier = Modifier.menuAnchor(),
+        readOnly = true,
+        value = selectedOptionText,
+        onValueChange = {},
+        label = { Text("Selecciona") },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+    )
+    ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+    ) {
+        options.forEach { selectionOption ->
+            DropdownMenuItem(
+                text = { Text(selectionOption) },
+                onClick = {
+                    selectedOptionText = selectionOption
+                    expanded = false
+                },
+                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+            )
+        }
+    }
+}`
+            },
+            // 9. DATE & TIME PICKERS
+            {
+                id: 'datetime',
+                name: 'Date & Time Pickers',
+                icon: 'schedule',
+                description: 'Componentes para selección de fecha y hora (Calendario y Reloj).',
+                webPreview: `
+                    <div class="flex flex-col gap-8 items-center w-full p-4">
+                        <!-- Date Picker Card -->
+                        <div class="bg-[#ECE6F0] rounded-[28px] p-4 w-full max-w-[280px] shadow-lg text-[#1D1B20] scale-90 origin-top">
+                            <div class="mb-4 px-2">
+                                <div class="text-xs text-[#49454F]">Select date</div>
+                                <div class="text-3xl font-medium">Mon, Nov 20</div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs mb-2 font-medium text-[#49454F]">
+                                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                            </div>
+                            <div class="grid grid-cols-7 gap-y-2 text-center text-sm">
+                                <span class="text-gray-400">29</span><span class="text-gray-400">30</span>
+                                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+                                <span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span>
+                                <span class="bg-m3-primary text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto">20</span>
+                                <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span>
+                            </div>
+                            <div class="flex justify-end gap-2 mt-4">
+                                <button class="text-m3-primary text-sm font-medium px-3 py-1">Cancel</button>
+                                <button class="text-m3-primary text-sm font-medium px-3 py-1">OK</button>
+                            </div>
+                        </div>
+
+                        <!-- Time Picker Card -->
+                        <div class="bg-[#ECE6F0] rounded-[28px] p-6 w-full max-w-[280px] shadow-lg text-[#1D1B20] flex flex-col items-center scale-90 origin-top">
+                            <div class="text-xs text-[#49454F] self-start mb-4">Enter time</div>
+                            <div class="flex items-center gap-2 mb-6">
+                                <div class="bg-[#E8DEF8] text-[#1D1B20] text-4xl font-normal p-3 rounded-lg border-2 border-m3-primary">10</div>
+                                <span class="text-4xl">:</span>
+                                <div class="bg-[#F3EDF7] text-[#1D1B20] text-4xl font-normal p-3 rounded-lg">30</div>
+                                <div class="flex flex-col ml-2 border border-[#79747E] rounded-lg overflow-hidden bg-[#FDFCF4]">
+                                    <div class="bg-[#E8DEF8] px-2 py-1 text-[10px] font-medium text-[#1D1B20]">AM</div>
+                                    <div class="px-2 py-1 text-[10px] font-medium text-[#49454F]">PM</div>
+                                </div>
+                            </div>
+                            <div class="w-40 h-40 rounded-full bg-[#F3EDF7] relative flex items-center justify-center mb-2 border border-gray-200">
+                                 <div class="absolute w-0.5 h-16 bg-m3-primary bottom-1/2 origin-bottom rotate-[-45deg]"></div>
+                                 <div class="w-1.5 h-1.5 bg-m3-primary rounded-full z-10"></div>
+                                 <span class="absolute top-1 text-xs text-[#49454F]">12</span>
+                                 <span class="absolute right-2 text-xs text-[#49454F]">3</span>
+                                 <span class="absolute bottom-1 text-xs text-[#49454F]">6</span>
+                                 <span class="absolute left-2 text-xs text-[#49454F]">9</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Date Picker
+var openDateDialog by remember { mutableStateOf(false) }
+val datePickerState = rememberDatePickerState()
+
+if (openDateDialog) {
+    DatePickerDialog(
+        onDismissRequest = { openDateDialog = false },
+        confirmButton = { TextButton(onClick = { openDateDialog = false }) { Text("OK") } }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+// 2. Time Picker
+var openTimeDialog by remember { mutableStateOf(false) }
+val timePickerState = rememberTimePickerState()
+
+if (openTimeDialog) {
+    // TimePickerDialog is not yet in M3, use a basic AlertDialog or custom dialog
+    AlertDialog(
+        onDismissRequest = { openTimeDialog = false },
+        confirmButton = { TextButton(onClick = { openTimeDialog = false }) { Text("OK") } },
+        text = {
+            TimePicker(state = timePickerState)
+        }
+    )
+}
+
+// 3. Time Input (Keyboard Mode)
+TimeInput(state = timePickerState)`
+            },
+            // 10. SELECTION (Radio & Segmented)
+            {
+                id: 'selection',
+                name: 'Selection Controls',
+                icon: 'check_box',
+                description: 'Radio Buttons y Segmented Buttons.',
+                webPreview: `
+                    <div class="flex flex-col gap-6 items-center w-full">
+                        <!-- Radio -->
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-full border-2 border-m3-primary flex items-center justify-center">
+                                    <div class="w-2.5 h-2.5 bg-m3-primary rounded-full"></div>
+                                </div>
+                                <span>Option A</span>
+                            </div>
+                            <div class="flex items-center gap-2 opacity-60">
+                                <div class="w-5 h-5 rounded-full border-2 border-[#49454F]"></div>
+                                <span>Option B</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Segmented -->
+                        <div class="flex rounded-full border border-[#79747E] overflow-hidden h-10">
+                            <button class="px-4 bg-m3-secondaryContainer text-m3-onSecondaryContainer border-r border-[#79747E] flex items-center gap-2">
+                                <span class="material-symbols-rounded text-lg">check</span> Songs
+                            </button>
+                            <button class="px-4 hover:bg-black/5 text-[#49454F] border-r border-[#79747E]">Albums</button>
+                            <button class="px-4 hover:bg-black/5 text-[#49454F]">Podcasts</button>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Radio Button
+var selectedOption by remember { mutableStateOf("A") }
+Row {
+    RadioButton(selected = selectedOption == "A", onClick = { selectedOption = "A" })
+    Text("Option A")
+    RadioButton(selected = selectedOption == "B", onClick = { selectedOption = "B" })
+    Text("Option B")
+}
+
+// 2. Segmented Button
+var selectedIndex by remember { mutableIntStateOf(0) }
+val options = listOf("Songs", "Albums", "Podcasts")
+
+SingleChoiceSegmentedButtonRow {
+    options.forEachIndexed { index, label ->
+        SegmentedButton(
+            shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+            onClick = { selectedIndex = index },
+            selected = index == selectedIndex
+        ) {
+            Text(label)
+        }
+    }
+}`
+            },
+            // 11. SNACKBAR
+            {
+                id: 'snackbar',
+                name: 'Snackbar',
+                icon: 'call_to_action',
+                description: 'Mensajes breves en la parte inferior de la pantalla.',
+                webPreview: `
+                    <div class="bg-[#322F35] text-[#F4EFF4] rounded-lg shadow-lg p-4 w-full max-w-sm flex justify-between items-center">
+                        <span class="text-sm">Correo archivado</span>
+                        <button class="text-[#D0BCFF] text-sm font-medium hover:bg-white/10 px-2 py-1 rounded">Deshacer</button>
+                    </div>
+                `,
+                kotlinCode: `val snackbarHostState = remember { SnackbarHostState() }
+val scope = rememberCoroutineScope()
+
+Scaffold(
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    floatingActionButton = {
+        ExtendedFloatingActionButton(
+            onClick = {
+                scope.launch {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Correo archivado",
+                        actionLabel = "Deshacer"
+                    )
+                }
+            }
+        ) { Text("Show Snackbar") }
+    }
+) { contentPadding -> 
+    // Content 
+}`
+            },
+            // 12. BOTTOM SHEET
+            {
+                id: 'bottomsheet',
+                name: 'Bottom Sheet',
+                icon: 'vertical_align_bottom',
+                description: 'Superficie que desliza desde abajo.',
+                webPreview: `
+                    <div class="relative w-full max-w-xs h-64 bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                        <!-- Scrim -->
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <!-- Sheet -->
+                        <div class="absolute bottom-0 w-full bg-[#ECE6F0] rounded-t-[28px] p-6 h-48 shadow-2xl">
+                             <div class="w-8 h-1 bg-[#79747E] opacity-40 rounded-full mx-auto mb-6"></div>
+                             <h4 class="text-xl font-medium mb-2">Opciones</h4>
+                             <div class="space-y-4 mt-4">
+                                <div class="h-4 bg-gray-300 rounded w-full"></div>
+                                <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                             </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `var showBottomSheet by remember { mutableStateOf(false) }
+val sheetState = rememberModalBottomSheetState()
+
+if (showBottomSheet) {
+    ModalBottomSheet(
+        onDismissRequest = { showBottomSheet = false },
+        sheetState = sheetState
+    ) {
+        // Sheet content
+        Column(Modifier.padding(16.dp)) {
+            Text("Opciones", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = { 
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) showBottomSheet = false
+                }
+            }) {
+                Text("Hide")
+            }
+        }
+    }
+}`
+            },
+            // Previous components kept for completeness
+            {
+                id: 'cards',
+                name: 'Cards',
+                icon: 'style',
+                description: 'Contenedores que muestran contenido y acciones sobre un solo tema.',
+                webPreview: `
+                    <div class="flex flex-col gap-6 items-center justify-center w-full p-4">
+                        <!-- Elevated Card -->
+                        <div class="m3-card bg-[#F7F2FA] w-full max-w-xs p-4 rounded-xl flex flex-col gap-2 cursor-pointer">
+                            <h4 class="font-bold text-lg">Elevated Card</h4>
+                            <p class="text-sm text-gray-600">Tiene una sombra sutil para separarse del fondo.</p>
+                        </div>
+                        <!-- Outlined Card -->
+                        <div class="border border-m3-outline bg-transparent w-full max-w-xs p-4 rounded-xl flex flex-col gap-2 hover:bg-gray-50 transition-colors cursor-pointer">
+                            <h4 class="font-bold text-lg">Outlined Card</h4>
+                            <p class="text-sm text-gray-600">Tiene un borde visible y fondo transparente.</p>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `ElevatedCard {
+    Text(text = "Elevated Card", modifier = Modifier.padding(16.dp))
+}
+OutlinedCard(border = BorderStroke(1.dp, Color.Black)) {
+    Text(text = "Outlined", modifier = Modifier.padding(16.dp))
+}`
+            },
+            {
+                id: 'textfield',
+                name: 'Text Fields',
+                icon: 'text_fields',
+                description: 'Permiten a los usuarios introducir texto.',
+                webPreview: `
+                    <div class="flex flex-col gap-6 items-center justify-center w-full max-w-xs mx-auto p-4">
+                        <div class="relative w-full group">
+                            <input type="text" class="peer w-full border border-[#79747E] rounded-[4px] px-4 py-3 bg-transparent focus:outline-none focus:border-m3-primary focus:border-2" placeholder="Label" />
+                            <label class="absolute left-3 -top-2.5 bg-[#FDFCF4] px-1 text-xs text-[#49454F] peer-focus:text-m3-primary">Label</label>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `var text by remember { mutableStateOf("") }
+OutlinedTextField(
+    value = text,
+    onValueChange = { text = it },
+    label = { Text("Label") }
+)`
+            },
+            {
+                id: 'custom_textfield',
+                name: 'Custom Text Fields',
+                icon: 'edit_note',
+                description: 'Campos de texto personalizados con gestión de estados de error y validación.',
+                webPreview: `
+                    <div class="flex flex-col gap-6 items-center justify-center w-full max-w-xs mx-auto p-4">
+                        <!-- Normal State -->
+                        <div class="relative w-full group">
+                            <div class="absolute left-3 top-3 text-[#49454F]">
+                                <span class="material-symbols-rounded text-xl">email</span>
+                            </div>
+                            <input type="text" class="peer w-full border border-[#79747E] rounded-[4px] pl-10 pr-4 py-3 bg-transparent focus:outline-none focus:border-m3-primary focus:border-2" placeholder="Email" value="usuario@email.com" />
+                            <label class="absolute left-10 -top-2.5 bg-[#FDFCF4] px-1 text-xs text-[#49454F] peer-focus:text-m3-primary">Email</label>
+                        </div>
+
+                        <!-- Error State -->
+                        <div class="relative w-full group">
+                            <div class="absolute left-3 top-3 text-[#49454F]">
+                                <span class="material-symbols-rounded text-xl">email</span>
+                            </div>
+                            <input type="text" class="peer w-full border border-m3-error rounded-[4px] pl-10 pr-4 py-3 bg-transparent focus:outline-none focus:border-m3-error focus:border-2 text-m3-error" placeholder="Email" value="error@" />
+                            <label class="absolute left-10 -top-2.5 bg-[#FDFCF4] px-1 text-xs text-m3-error">Email*</label>
+                            <span class="text-xs text-m3-error mt-1 ml-4 block">Formato de correo incorrecto</span>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Interface de Validación
+interface Validacion {
+    val hayError: Boolean
+        get() = false
+    val mensajeError: String?
+        get() = null
+}
+
+// 2. TextField con Estado de Error
+@Composable
+private fun OutlinedTextFieldWithErrorState(
+    modifier: Modifier = Modifier,
+    label: String,
+    textoState: String,
+    textoPista: String = "",
+    leadingIcon: @Composable (() -> Unit)? = null,
+    validacionState: Validacion,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+    keyboardActions: KeyboardActions = KeyboardActions(),
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        modifier = modifier,
+        value = textoState,
+        onValueChange = onValueChange,
+        singleLine = true,
+        leadingIcon = leadingIcon,
+        placeholder = {
+            Text(
+                text = textoPista,
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                )
+            )
+        },
+        label = { Text(if (validacionState.hayError) "\${label}*" else label) },
+        keyboardOptions = keyboardOptions,
+        supportingText = {
+            if (validacionState.hayError) {
+                Text(text = validacionState.mensajeError!!)
+            }
+        },
+        isError = validacionState.hayError,
+        keyboardActions = keyboardActions
+    )
+}
+
+// 3. Implementación Específica para Email
+@Composable
+private fun OutlinedTextFieldEmail(
+    modifier: Modifier = Modifier,
+    label: String = "Email",
+    emailState: String,
+    validacionState: Validacion,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextFieldWithErrorState(
+        modifier = modifier,
+        label = label,
+        textoState = emailState,
+        textoPista = "ejemplo@correo.com",
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Email,
+                contentDescription = "Email"
+            )
+        },
+        validacionState = validacionState,
+        onValueChange = onValueChange
+    )
+}`
+            },
+            {
+                id: 'switch',
+                name: 'Switch & Checkbox',
+                icon: 'toggle_on',
+                description: 'Controles de selección binaria.',
+                webPreview: `
+                    <div class="flex flex-col gap-8 items-center justify-center p-4">
+                        <div class="flex items-center gap-4">
+                            <label class="m3-switch relative inline-block w-[52px] h-[32px] cursor-pointer">
+                                <input type="checkbox" checked class="opacity-0 w-0 h-0">
+                                <div class="slider absolute inset-0 bg-[#6750A4] rounded-full border-2 border-[#6750A4]">
+                                    <span class="thumb absolute h-6 w-6 rounded-full bg-white left-[2px] bottom-[2px] translate-x-5 flex items-center justify-center">
+                                         <span class="material-symbols-rounded text-m3-primary text-sm">check</span>
+                                    </span>
+                                </div>
+                            </label>
+                            <span>Switch On</span>
+                        </div>
+                         <div class="flex items-center gap-3">
+                            <div class="w-[18px] h-[18px] bg-m3-primary rounded-sm flex items-center justify-center text-white">
+                                <span class="material-symbols-rounded text-sm">check</span>
+                            </div>
+                            <span>Checkbox</span>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `var checked by remember { mutableStateOf(true) }
+Switch(checked = checked, onCheckedChange = { checked = it })
+Checkbox(checked = checked, onCheckedChange = { checked = it })`
+            },
+            {
+                id: 'slider',
+                name: 'Slider',
+                icon: 'linear_scale',
+                description: 'Permite a los usuarios seleccionar un valor de un rango. Incluye variantes con pasos y rangos.',
+                webPreview: `
+                    <div class="w-full max-w-xs px-4 py-4 flex flex-col gap-6">
+                        <!-- Basic -->
+                        <div>
+                            <label class="text-xs text-gray-500">Basic</label>
+                            <input type="range" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-m3-primary">
+                        </div>
+                        <!-- Steps -->
+                        <div>
+                            <label class="text-xs text-gray-500">Steps (5)</label>
+                            <input type="range" step="20" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-m3-primary">
+                            <div class="flex justify-between px-1 mt-1">
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            </div>
+                        </div>
+                        <!-- Range (Simulated) -->
+                        <div>
+                            <label class="text-xs text-gray-500">Range</label>
+                            <div class="relative w-full h-6 flex items-center">
+                                <div class="absolute w-full h-1 bg-gray-200 rounded-lg"></div>
+                                <div class="absolute left-1/4 right-1/4 h-1 bg-m3-primary rounded-lg"></div>
+                                <div class="absolute left-1/4 w-5 h-5 bg-m3-primary rounded-full -ml-2.5 shadow cursor-pointer"></div>
+                                <div class="absolute right-1/4 w-5 h-5 bg-m3-primary rounded-full -mr-2.5 shadow cursor-pointer"></div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Basic Slider
+var sliderPosition by remember { mutableFloatStateOf(0f) }
+Slider(
+    value = sliderPosition,
+    onValueChange = { sliderPosition = it }
+)
+
+// 2. Slider with Steps
+Slider(
+    value = sliderPosition,
+    onValueChange = { sliderPosition = it },
+    steps = 5, // 5 pasos entre 0 y 100
+    valueRange = 0f..100f
+)
+
+// 3. Range Slider
+var rangePosition by remember { mutableStateOf(0f..100f) }
+RangeSlider(
+    value = rangePosition,
+    onValueChange = { rangePosition = it },
+    valueRange = 0f..100f
+)`
+            },
+            {
+                id: 'searchbar',
+                name: 'Search Bar',
+                icon: 'search',
+                description: 'Barra de búsqueda flotante o anclada.',
+                webPreview: `
+                    <div class="w-full max-w-xs bg-[#ECE6F0] rounded-full h-14 flex items-center px-4 gap-4 shadow-sm">
+                        <span class="material-symbols-rounded text-[#49454F]">search</span>
+                        <span class="text-[#49454F] text-base">Search</span>
+                        <div class="flex-1"></div>
+                        <span class="material-symbols-rounded text-[#49454F]">mic</span>
+                        <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">A</div>
+                    </div>
+                `,
+                kotlinCode: `var text by remember { mutableStateOf("") }
+var active by remember { mutableStateOf(false) }
+
+SearchBar(
+    query = text,
+    onQueryChange = { text = it },
+    onSearch = { active = false },
+    active = active,
+    onActiveChange = { active = it },
+    placeholder = { Text("Search") },
+    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+    trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+) {
+    // Search results
+}`
+            },
+            {
+                id: 'chips',
+                name: 'Chips',
+                icon: 'label',
+                description: 'Elementos compactos que permiten a los usuarios introducir información, hacer selecciones, filtrar contenido o activar acciones.',
+                webPreview: `
+                    <div class="flex flex-wrap gap-4 p-4 justify-center">
+                        <!-- Assist Chip -->
+                        <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#79747E] text-[#1D1B20] hover:bg-[#1D1B20]/10 transition-colors">
+                            <span class="material-symbols-rounded text-lg">smart_toy</span>
+                            <span class="text-sm font-medium">Assist</span>
+                        </button>
+
+                        <!-- Filter Chip (Selected) -->
+                        <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#E8DEF8] text-[#1D1B20] hover:bg-[#E8DEF8]/80 transition-colors">
+                            <span class="material-symbols-rounded text-lg">check</span>
+                            <span class="text-sm font-medium">Filter</span>
+                        </button>
+
+                        <!-- Input Chip -->
+                        <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#79747E] text-[#1D1B20] hover:bg-[#1D1B20]/10 transition-colors">
+                            <span class="text-sm font-medium">Input</span>
+                            <span class="material-symbols-rounded text-lg text-[#49454F]">close</span>
+                        </button>
+
+                        <!-- Suggestion Chip -->
+                        <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#79747E] text-[#1D1B20] hover:bg-[#1D1B20]/10 transition-colors">
+                            <span class="text-sm font-medium">Suggestion</span>
+                        </button>
+                    </div>
+                `,
+                kotlinCode: `// 1. Assist Chip
+AssistChip(
+    onClick = { /* Do something! */ },
+    label = { Text("Assist Chip") },
+    leadingIcon = {
+        Icon(Icons.Filled.Settings, contentDescription = null, Modifier.size(AssistChipDefaults.IconSize))
+    }
+)
+
+// 2. Filter Chip
+var selected by remember { mutableStateOf(true) }
+FilterChip(
+    onClick = { selected = !selected },
+    label = { Text("Filter Chip") },
+    selected = selected,
+    leadingIcon = if (selected) {
+        { Icon(Icons.Filled.Done, contentDescription = null, Modifier.size(FilterChipDefaults.IconSize)) }
+    } else {
+        null
+    },
+)
+
+// 3. Input Chip
+InputChip(
+    onClick = { },
+    label = { Text("Input Chip") },
+    selected = true,
+    avatar = {
+        Icon(Icons.Filled.Person, contentDescription = null, Modifier.size(InputChipDefaults.AvatarSize))
+    },
+    trailingIcon = {
+        Icon(Icons.Default.Close, contentDescription = null, Modifier.size(InputChipDefaults.AvatarSize))
+    }
+)
+
+// 4. Suggestion Chip
+SuggestionChip(
+    onClick = { },
+    label = { Text("Suggestion Chip") }
+)`
+            },
+             {
+                id: 'tabs',
+                name: 'Tabs',
+                icon: 'tab',
+                description: 'Organiza contenido en diferentes pantallas. Incluye variantes Primaria y Secundaria.',
+                webPreview: `
+                    <div class="w-full max-w-sm flex flex-col gap-6 p-4">
+                        <!-- Primary Tabs -->
+                        <div>
+                            <div class="text-xs text-gray-500 mb-2">Primary Tabs</div>
+                            <div class="bg-white border-b border-[#E7E0EC]">
+                                <div class="flex text-center">
+                                    <div class="flex-1 py-3 text-m3-primary font-medium text-sm border-b-2 border-m3-primary flex flex-col items-center gap-1">
+                                        <span class="material-symbols-rounded text-lg">explore</span>
+                                        <span>Explore</span>
+                                    </div>
+                                    <div class="flex-1 py-3 text-[#49454F] font-medium text-sm flex flex-col items-center gap-1">
+                                        <span class="material-symbols-rounded text-lg">flight</span>
+                                        <span>Flights</span>
+                                    </div>
+                                    <div class="flex-1 py-3 text-[#49454F] font-medium text-sm flex flex-col items-center gap-1">
+                                        <span class="material-symbols-rounded text-lg">trip_origin</span>
+                                        <span>Trips</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Tabs -->
+                        <div>
+                            <div class="text-xs text-gray-500 mb-2">Secondary Tabs</div>
+                            <div class="bg-white">
+                                <div class="flex text-center">
+                                    <div class="flex-1 py-2 text-m3-primary font-medium text-sm border-b-2 border-m3-primary">Audio</div>
+                                    <div class="flex-1 py-2 text-[#49454F] font-medium text-sm">Video</div>
+                                    <div class="flex-1 py-2 text-[#49454F] font-medium text-sm">Photos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// 1. Primary Tabs (Main Navigation)
+var state by remember { mutableIntStateOf(0) }
+val titles = listOf("Explore", "Flights", "Trips")
+
+TabRow(selectedTabIndex = state) {
+    titles.forEachIndexed { index, title ->
+        Tab(
+            selected = state == index,
+            onClick = { state = index },
+            text = { Text(title) },
+            icon = { 
+                Icon(
+                    imageVector = if (index == 0) Icons.Filled.Explore else Icons.Filled.Home, 
+                    contentDescription = null
+                ) 
+            }
+        )
+    }
+}
+
+// 2. Secondary Tabs (Content Hierarchy)
+var secState by remember { mutableIntStateOf(0) }
+val secTitles = listOf("Audio", "Video", "Photos")
+
+SecondaryTabRow(selectedTabIndex = secState) {
+    secTitles.forEachIndexed { index, title ->
+        Tab(
+            selected = secState == index,
+            onClick = { secState = index },
+            text = { Text(title) }
+        )
+    }
+}`
+            },
+            {
+                id: 'dialog',
+                name: 'Dialog',
+                icon: 'chat_bubble',
+                description: 'Ventanas modales para decisiones críticas.',
+                webPreview: `
+                    <div class="bg-[#ECE6F0] p-6 rounded-[28px] w-full max-w-[280px] shadow-xl mx-auto flex flex-col gap-4">
+                        <h4 class="text-2xl text-[#1D1B20]">Dialog Title</h4>
+                        <p class="text-[#49454F] text-sm">This is a description.</p>
+                        <div class="flex justify-end gap-2">
+                            <button class="text-m3-primary font-medium text-sm px-3 py-2">Cancel</button>
+                            <button class="text-m3-primary font-medium text-sm px-3 py-2">OK</button>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `AlertDialog(
+    onDismissRequest = { },
+    title = { Text("Dialog Title") },
+    text = { Text("This is a description.") },
+    confirmButton = { TextButton(onClick = {}) { Text("OK") } },
+    dismissButton = { TextButton(onClick = {}) { Text("Cancel") } }
+)`
+            },
+            // 14. ASYNC IMAGE (COIL)
+            {
+                id: 'asyncimage',
+                name: 'AsyncImage (Coil)',
+                icon: 'image',
+                description: 'Carga imágenes de forma asíncrona desde una URL usando la librería Coil.',
+                webPreview: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <img src="https://picsum.photos/200" alt="Async Image" class="w-32 h-32 object-cover rounded-lg shadow-md" />
+                        <p class="text-xs text-gray-500 mt-2">Imagen cargada desde URL</p>
+                    </div>
+                `,
+                kotlinCode: `AsyncImage(
+    model = "https://picsum.photos/200",
+    contentDescription = "Descripción de la imagen",
+    modifier = Modifier
+        .size(128.dp)
+        .clip(RoundedCornerShape(8.dp)),
+    placeholder = painterResource(R.drawable.placeholder),
+    error = painterResource(R.drawable.error)
+)`
+            },
+            // 15. HORIZONTAL PAGER
+            {
+                id: 'pager',
+                name: 'Horizontal Pager',
+                icon: 'view_carousel',
+                description: 'Permite a los usuarios deslizar horizontalmente entre páginas de contenido.',
+                webPreview: `
+                    <div class="w-full max-w-xs h-48 bg-[#F3EDF7] rounded-xl relative overflow-hidden flex flex-col items-center justify-center border border-[#CAC4D0]">
+                        <div class="text-4xl font-bold text-[#49454F]">Page 1</div>
+                        <div class="text-sm text-[#49454F] mt-2">Swipe to see more</div>
+                        
+                        <!-- Page Indicators -->
+                        <div class="absolute bottom-4 flex gap-2">
+                            <div class="w-2 h-2 rounded-full bg-m3-primary"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#CAC4D0]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#CAC4D0]"></div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `val pagerState = rememberPagerState(pageCount = { 10 })
+
+Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    HorizontalPager(state = pagerState) { page ->
+        // Our page content
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Page $page",
+                style = MaterialTheme.typography.headlineLarge
+            )
+        }
+    }
+    
+    // Optional: Page Indicator
+    Row(
+        Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        repeat(pagerState.pageCount) { iteration ->
+            val color = if (pagerState.currentPage == iteration)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.outlineVariant
+            Box(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .size(8.dp)
+            )
+        }
+    }
+}`
+            },
+            // 16. SWIPE TO DISMISS
+            {
+                id: 'swipetodismiss',
+                name: 'Swipe To Dismiss',
+                icon: 'swipe',
+                description: 'Patrón de deslizamiento para descartar elementos, comúnmente usado en listas.',
+                webPreview: `
+                    <div class="w-full max-w-xs flex flex-col gap-2">
+                        <!-- Background (Delete Action) -->
+                        <div class="relative w-full h-16 bg-red-600 rounded-lg flex items-center justify-end px-4 overflow-hidden">
+                            <span class="material-symbols-rounded text-white">delete</span>
+                            
+                            <!-- Foreground (Content) - Simulated Swipe -->
+                            <div class="absolute top-0 left-0 w-full h-full bg-[#F3EDF7] flex items-center px-4 gap-3 shadow-md transform -translate-x-12 transition-transform">
+                                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center text-purple-700 font-bold">A</div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium text-[#1D1B20]">Swipe me left</span>
+                                    <span class="text-xs text-[#49454F]">Action revealed behind</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                kotlinCode: `// Material 3 (1.2.0+) - SwipeToDismissBox
+val dismissState = rememberSwipeToDismissBoxState()
+
+SwipeToDismissBox(
+    state = dismissState,
+    backgroundContent = {
+        val color = when (dismissState.dismissDirection) {
+            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+            SwipeToDismissBoxValue.StartToEnd -> Color.Green
+            else -> Color.Transparent
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color)
+                .padding(horizontal = 20.dp),
+            contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) 
+                Alignment.CenterEnd else Alignment.CenterStart
+        ) {
+            Icon(Icons.Default.Delete, contentDescription = "Delete")
+        }
+    }
+) {
+    ListItem(
+        headlineContent = { Text("Swipe me!") },
+        supportingContent = { Text("Swipe to reveal actions") },
+        leadingContent = { 
+            Icon(Icons.Default.Email, contentDescription = null) 
+        }
+    )
+}`
+            },
+            // 17. DIVIDER
+            {
+                id: 'divider',
+                name: 'Horizontal Divider',
+                icon: 'remove',
+                description: 'Una línea delgada que agrupa contenido en listas y diseños.',
+                webPreview: `
+                    <div class="w-full max-w-xs flex flex-col gap-4 p-4 bg-white rounded-lg border border-gray-200">
+                        <div class="text-sm text-[#49454F]">Item 1</div>
+                        <hr class="border-t border-[#CAC4D0] w-full" />
+                        <div class="text-sm text-[#49454F]">Item 2</div>
+                        <hr class="border-t-2 border-m3-primary w-full" />
+                        <div class="text-sm text-[#49454F]">Item 3</div>
+                    </div>
+                `,
+                kotlinCode: `Column {
+    Text("Item 1")
+    HorizontalDivider()
+    
+    Text("Item 2")
+    HorizontalDivider(
+        thickness = 2.dp,
+        color = MaterialTheme.colorScheme.primary
+    )
+    
+    Text("Item 3")
+}`
+            }
+        ];
+
+        // --- UI LOGIC ---
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const componentList = document.getElementById('componentList');
+        const contentArea = document.getElementById('contentArea');
+        const pageTitle = document.getElementById('pageTitle');
+        const toast = document.getElementById('toast');
+
+        let currentComponentId = null;
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function showToast() {
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        function copyCode(code) {
+            const el = document.createElement('textarea');
+            el.value = code;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast();
+        }
+
+        function renderSidebar() {
+            componentList.innerHTML = components.map(comp => `
+                <button 
+                    onclick="loadComponent('${comp.id}')"
+                    class="w-full flex items-center gap-4 px-4 py-3 rounded-full text-left transition-colors group ${currentComponentId === comp.id ? 'bg-m3-primaryContainer text-m3-onPrimaryContainer' : 'hover:bg-[#E8DEF8] text-[#49454F]'}"
+                >
+                    <span class="material-symbols-rounded ${currentComponentId === comp.id ? 'font-fill' : ''}">${comp.icon}</span>
+                    <span class="font-medium text-sm">${comp.name}</span>
+                </button>
+            `).join('');
+        }
+
+        function loadComponent(id) {
+            currentComponentId = id;
+            const comp = components.find(c => c.id === id);
+            
+            if (!comp) return;
+
+            pageTitle.innerText = comp.name;
+            
+            // Close sidebar on mobile upon selection
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+
+            // Render Sidebar again to update active state
+            renderSidebar();
+
+            // Render Content
+            contentArea.innerHTML = `
+                <!-- Component Description -->
+                <div class="col-span-1 lg:col-span-2 mb-4">
+                    <p class="text-[#49454F] text-lg">${comp.description}</p>
+                </div>
+
+                <!-- Preview Card -->
+                <div class="col-span-1 bg-white rounded-3xl border border-[#CAC4D0] overflow-hidden flex flex-col shadow-sm h-fit">
+                    <div class="bg-[#F3EDF7] px-6 py-4 border-b border-[#E7E0EC] flex justify-between items-center">
+                        <h3 class="font-medium text-[#1D1B20]">Preview Web</h3>
+                        <span class="text-xs bg-white border px-2 py-0.5 rounded text-gray-500">HTML/CSS Sim</span>
+                    </div>
+                    <div class="p-8 bg-[#FDFCF4] min-h-[300px] flex items-center justify-center relative">
+                        ${comp.webPreview}
+                        <div class="absolute bottom-2 right-2 text-[10px] text-gray-300 select-none">M3 Simulation</div>
+                    </div>
+                </div>
+
+                <!-- Code Card -->
+                <div class="col-span-1 bg-[#282c34] rounded-3xl overflow-hidden flex flex-col shadow-md h-fit relative group text-white">
+                    <div class="bg-[#21252b] px-6 py-4 border-b border-[#181a1f] flex justify-between items-center">
+                        <h3 class="font-medium text-[#abb2bf] flex items-center gap-2">
+                            <span class="material-symbols-rounded text-sm text-orange-400">code</span>
+                            Jetpack Compose
+                        </h3>
+                        <button 
+                            onclick="copyCode(components.find(c => c.id === '${id}').kotlinCode)"
+                            class="text-xs bg-[#6750A4] hover:bg-[#7D5260] text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+                        >
+                            <span class="material-symbols-rounded text-sm">content_copy</span> Copiar
+                        </button>
+                    </div>
+                    <div class="relative overflow-x-auto">
+                        <pre class="!bg-[#282c34] !p-6 !m-0 !text-sm language-kotlin"><code>${comp.kotlinCode.replace(/</g, '&lt;')}</code></pre>
+                    </div>
+                </div>
+            `;
+
+            // Trigger Syntax Highlight
+            Prism.highlightAll();
+        }
+
+        // Initialize
+        renderSidebar();
+    </script>
+</body>
+</html>

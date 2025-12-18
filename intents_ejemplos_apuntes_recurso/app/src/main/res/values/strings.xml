@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EjemplosIntents</string>
+    <string name="enviar_correo">Enviar correo a:</string>
+    <string name="title_activity_que_produce_un_texto">ActivityQueProduceUnTexto</string>
+</resources>

@@ -1,3 +1,7 @@
+package com.pmdm.agenda.features.formcontacto
+
+import ContactoEvent
+import ValidacionContactoUiState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue

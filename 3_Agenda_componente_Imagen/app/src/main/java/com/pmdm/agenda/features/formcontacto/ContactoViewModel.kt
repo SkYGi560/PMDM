@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pmdm.agenda.data.ContactoRepository
 import com.pmdm.agenda.features.ContactoUiState
 import com.pmdm.agenda.features.ValidadorContacto
@@ -13,6 +14,8 @@ import com.pmdm.agenda.features.toContacto
 import com.pmdm.agenda.features.toContactoUiState
 import com.pmdm.agenda.models.Contacto
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,19 +37,33 @@ class ContactoViewModel @Inject constructor(
         private set
     var verSnackBarState by mutableStateOf(false)
         private set
+    private var _listaContactosState by mutableStateOf(mutableListOf<ContactoUiState>())
+    val listaContactosState: List<ContactoUiState>
+        get() = _listaContactosState
+
+    private suspend fun getContactos(): MutableList<ContactoUiState> =
+        contactoRepository.get().map { it.toContactoUiState() }.toMutableList()
+
+    init {
+        viewModelScope.launch {
+            _listaContactosState = getContactos()
+        }
+    }
 
     // Este método se llamará cuando queramos editar un contacto ya existente
     // justo antes de navegar o cargar el formulario FormContactoScreen.
     // Recibimos el id del contacto a editar y lo buscamos en el repositorio.
     fun setContactoState(idContacto: Int) {
-        // Indicamos que estamos editando un contacto existente, para hacer un update al guardar.
-        editandoContactoExistenteState = true
-        val c: Contacto = contactoRepository.get(idContacto)
-            ?: throw ContactoViewModelException("El id $idContacto no existe en la base de datos")
-        // Tras buscarlo en el repositorio, lo convertimos a ContactoUiState y lo asignamos al estado.
-        contactoState = c.toContactoUiState()
-        // Se actualiza el estado de validación, aunque no debería haber errores.
-        validacionContactoState = validadorContacto.valida(contactoState)
+        viewModelScope.launch {
+            // Indicamos que estamos editando un contacto existente, para hacer un update al guardar.
+            editandoContactoExistenteState = true
+            val c: Contacto = contactoRepository.get(idContacto)
+                ?: throw ContactoViewModelException("El id $idContacto no existe en la base de datos")
+            // Tras buscarlo en el repositorio, lo convertimos a ContactoUiState y lo asignamos al estado.
+            contactoState = c.toContactoUiState()
+            // Se actualiza el estado de validación, aunque no debería haber errores.
+            validacionContactoState = validadorContacto.valida(contactoState)
+        }
     }
 
     // Este método se llamará cuando queramos crear un nuevo contacto.
@@ -106,9 +123,14 @@ class ContactoViewModel @Inject constructor(
                 if (!validacionContactoState.hayError) {
                     val c: Contacto = contactoState.toContacto()
                     if (editandoContactoExistenteState) {
-                        contactoRepository.update(c)
+                        viewModelScope.launch {
+                            contactoRepository.update(c)
+                        }
+
                     } else {
-                        contactoRepository.insert(c)
+                        viewModelScope.launch {
+                            contactoRepository.insert(c)
+                        }
                     }
                     // Tras guardar seguiremos iremos a la pantalla correspondiente
                     // por ahora no hacemos nada

@@ -1,4 +1,18 @@
+package com.pmdm.agenda.features.formcontacto
+
+import ContactoEvent
+import ValidacionContactoUiState
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -32,7 +46,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,15 +64,56 @@ import com.pmdm.agenda.ui.features.components.ImagenContacto
 import com.pmdm.agenda.ui.theme.AgendaTheme
 
 @Composable
+fun registroSelectorDeImagenesConGetContent(
+    onFotoCambiada: (ImageBitmap) -> Unit
+): ManagedActivityResultLauncher<String, Uri?> {
+    val context = LocalContext.current
+    return rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            onFotoCambiada(context.toImageBitmap(uri))
+        }
+    }
+}
+
+private fun Context.toImageBitmap(uri: Uri): ImageBitmap {
+    val contextResolver = this.contentResolver
+    val source = ImageDecoder.createSource(contextResolver, uri)
+    return ImageDecoder.decodeBitmap(source).asImageBitmap()
+}
+
+@Composable
+fun registroHacerFotoConIntent(
+    onFotoCambiada: (ImageBitmap) -> Unit
+): ManagedActivityResultLauncher<String, Boolean> {
+    val cameraLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts
+            .StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val androidBitmap = result.data?.extras?.get("data") as Bitmap
+                onFotoCambiada(androidBitmap.asImageBitmap())
+            }
+        }
+    return rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { success ->
+        if (success) {
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE)
+            cameraLauncher.launch(cameraIntent)
+        }
+    }
+}
+
+
+@Composable
 private fun CabeceraFoto(
-    backgroundModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     imageModifier: Modifier = Modifier,
     foto: ImageBitmap?,
     onFotoCambiada: (ImageBitmap) -> Unit
 ) {
 
     Box(
-        modifier = backgroundModifier.then(
+        modifier = modifier.then(
             Modifier.background(MaterialTheme.colorScheme.primary)
         ),
         contentAlignment = Alignment.Center
@@ -74,11 +131,12 @@ private fun CabeceraFoto(
             foto = foto,
             anchoBorde = 4.dp
         )
+        val launcherHacerFoto = registroHacerFotoConIntent(onFotoCambiada)
         OutlinedIconButton(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(16.dp),
-            onClick = { },
+            onClick = { launcherHacerFoto.launch(android.Manifest.permission.CAMERA) },
         ) {
             Icon(
                 painter = Filled.getPhotoCameraIcon(),
@@ -86,11 +144,12 @@ private fun CabeceraFoto(
                 modifier = Modifier.size(ButtonDefaults.IconSize),
             )
         }
+        val launcherFotoGaleria = registroSelectorDeImagenesConGetContent(onFotoCambiada)
         OutlinedIconButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            onClick = { }
+            onClick = { launcherFotoGaleria.launch("image/*") }
         ) {
             Icon(
                 painter = Filled.getImageIcon(),
@@ -219,7 +278,7 @@ fun FormContactoScreenHorizontal(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CabeceraFoto(
-            backgroundModifier = Modifier
+            modifier = Modifier
                 .fillMaxHeight()
                 .size(height = 0.dp, width = 225.dp),
             imageModifier = Modifier.fillMaxWidth(),
@@ -246,7 +305,7 @@ fun FormContactoScreenVertical(
 ) {
     Column {
         CabeceraFoto(
-            backgroundModifier = Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .size(height = 225.dp, width = 0.dp),
             imageModifier = Modifier.fillMaxHeight(),
@@ -313,7 +372,7 @@ fun FormContactoScreen(
 fun FormContactoScreenTest(){
     var contactoState by remember { mutableStateOf(ContactoUiState()) }
     var validacionContactoState by remember { mutableStateOf(ValidacionContactoUiState()) }
-    var validadorContacto = remember { ValidadorContacto() }
+    val validadorContacto = remember { ValidadorContacto() }
     var verSnackBarState by remember { mutableStateOf(false) }
 
     AgendaTheme {

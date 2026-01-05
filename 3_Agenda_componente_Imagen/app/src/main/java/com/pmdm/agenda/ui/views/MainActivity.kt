@@ -1,7 +1,7 @@
 package com.pmdm.agenda.ui.views
 
 import com.pmdm.agenda.features.formcontacto.ContactoViewModel
-import FormContactoScreen
+import com.pmdm.agenda.features.formcontacto.FormContactoScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

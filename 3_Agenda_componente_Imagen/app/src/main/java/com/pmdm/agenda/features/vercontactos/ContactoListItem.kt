@@ -1,5 +1,11 @@
 package com.pmdm.agenda.features.vercontactos
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.R
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -110,7 +118,7 @@ fun DatosContacto(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "${apellidos}, ${nombre}",
+            text = "${apellidos}, $nombre",
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -137,20 +145,56 @@ fun DatosContacto(
     }
 }
 
-@Preview(
-    name = "PORTRAIT",
-    device = "spec:width=360dp,height=800dp,dpi=480",
-    showBackground = true
-)
+@Composable
+fun registroLlamarPorTelefonoIntent(
+    telefono: String
+): ManagedActivityResultLauncher<String, Boolean> {
+    val context = LocalContext.current
+    return rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { success ->
+        if (success) {
+            Intent(Intent.ACTION_CALL).also {
+                    callIntent ->
+                callIntent.data = Uri.parse("tel:$telefono")
+                context.startActivity(callIntent)
+            }
+        }
+    }
+}
+fun Context.sendMail(
+    correos: Array<String>,
+    asunto: String,
+    texto: String,
+    forzarEleccion: Boolean = false
+) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+// Añadimos los datos del correo.
+        putExtra(Intent.EXTRA_EMAIL, correos)
+        putExtra(Intent.EXTRA_SUBJECT, asunto)
+        putExtra(Intent.EXTRA_TEXT, texto)
+    }
+    val chooser = if (forzarEleccion) {
+        val title: String = resources.getString(/*R.string.enviar_correo*/com.pmdm.agenda.R.string.app_name)
+        Intent.createChooser(intent, title)
+    }
+    else null
+    if (intent.resolveActivity(packageManager) != null) {
+        startActivity(chooser ?: intent)
+    }
+}
 // Muestra OutlinedIconButton con los iconos de las
 // acciones posibles sobre ul contacto seleccionado.
 @Composable
 fun AccionesContacto(
-    onLlamarClicked: () -> Unit = {},
+    telefono: String,
     onCorreoClicked: () -> Unit = {},
     onEditClicked: () -> Unit = {},
     onDeleteClicked: () -> Unit = {}
 ) {
+    val launcherTelefono = registroLlamarPorTelefonoIntent(telefono)
+    val context = LocalContext.current
     data class Accion(
         val icon: Painter,
         val description: String,
@@ -166,12 +210,16 @@ fun AccionesContacto(
             Accion(
                 icon = phoneIcon,
                 description = "Llamar",
-                onClick = onLlamarClicked
+                onClick = { launcherTelefono.launch(android.Manifest.permission.CALL_PHONE) }
             ),
             Accion(
                 icon = correoIcon,
                 description = "Correo",
-                onClick = onCorreoClicked
+                onClick = { context.sendMail(
+                    correos = arrayOf("correo@alu.edu.gva.es"),
+                    asunto = "Asunto del correo",
+                    texto = "Texto del correo"
+                ) }
             ),
             Accion(
                 icon = editIcon,
@@ -301,6 +349,7 @@ fun ContactoListItem(
         )
         if (seleccionadoState)
             AccionesContacto(
+                telefono = contactoUiState.telefono,
                 onEditClicked = onEditClicked,
                 onDeleteClicked = onDeleteClicked
             )

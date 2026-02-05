@@ -1,0 +1,25 @@
+package com.pmdm.agenda.data.room.contacto
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+
+@Entity(tableName = "contactos")
+data class ContactoEntity(
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    val id: Int,
+    @ColumnInfo(name = "nombre")
+    val nombre: String,
+    @ColumnInfo(name = "apellidos")
+    val apellidos: String,
+    @ColumnInfo(name = "telefono")
+    val telefono: String,
+    @ColumnInfo(name = "email")
+    val email: String,
+    @ColumnInfo(name = "foto", typeAffinity = ColumnInfo.BLOB)
+    val foto: String?,
+    @ColumnInfo(name = "categorias")
+    val categorias: String
+)

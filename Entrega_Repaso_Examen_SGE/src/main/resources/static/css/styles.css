@@ -1,0 +1,85 @@
+@charset "UTF-8";
+
+td {
+	font-size: 16px;
+}
+
+label {
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+input, select, span {
+	margin-bottom: 10px;
+} 
+
+#loginbox, #signupbox {
+  width: 80%;
+  padding-top: 60px;
+}
+
+#logotipo {
+	width: 50%;
+	margin-bottom: 10px;
+}	
+
+.navbar {
+  font-size: 25px;
+  margin-bottom: 15px;
+  padding: 0px 0px 0px 0px;
+  border-radius: 0;
+}
+
+.jumbotron {
+  font-size: 60px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 15px;
+}
+
+
+footer {
+	background-color: #f2f2f2;
+	padding: 25px;
+}
+
+@media (min-width: 1200px) {
+	.container {
+		width: 90%;
+		max-width: 90%;
+	}
+  }
+
+.card-header {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.precio {
+	font-size: 18px;
+	font-weight: bold;
+	padding-top: 5px;
+}
+
+.card.card-producto {
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.divider:after,
+.divider:before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+
+.h-custom {
+  height: calc(100% - 73px);
+}
+
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
+  }
+}

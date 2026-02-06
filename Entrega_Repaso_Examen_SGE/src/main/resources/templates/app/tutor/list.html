@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layouts/header::head"></head>
+
+<body>
+	<div th:replace="layouts/cabecera::cabecera"></div>
+	<nav th:replace="layouts/menu::menu(tutores)"></nav>
+	          
+    <div class="container">
+		<div class="card border-info">
+			<div class="card-header bg-info text-white">
+				<table width="100%" border="0">
+					<tr>
+						<td width="70%">
+							<h2>Listado de tutores</h2>
+						</td>
+						<td width="20%">
+							<form class="float-end d-flex gap-2">
+								<input type="text" class="form-control" placeholder="Buscar..." name="q" th:value="${param.q}">
+							</form>									
+						</td>
+						<td width="10%" align="right"><a th:href="@{/app/tutor/new}" class="btn btn btn-success">Nuevo tutor</a></td>
+					</tr>
+				</table>
+			</div> <!-- card-heading -->
+			<div class="card-body">
+		      <table class="table">
+		      	<thead>
+		      		<tr>
+		      			<th><h3>Nombre</h3></th>
+		      			<th><h3>Apellidos</h3></th>
+		      			<th><h3>Email</h3></th>
+		      			<th><h3>Operaciones</h3></th>
+		      		</tr>
+		      	</thead>
+		      	<tbody>
+		      		<tr th:each="tutor : ${listaTutores}">
+		      			<td th:text="${tutor.nombre}">Nombre</td>
+		      			<td th:text="${tutor.apellidos}">Apellidos</td>
+		      			<td th:text="${tutor.email}">Email</td>
+		      			<td><a th:href="@{/app/tutor/edit/{id}(id=${tutor.id})}" class="btn btn btn-primary">Editar tutor</a>&nbsp;&nbsp;&nbsp;
+		      				<a th:href="@{/app/tutor/del/{id}(id=${tutor.id})}" class="btn btn btn-danger">Borrar tutor</a></td>
+		      		</tr>
+		      	</tbody>
+		      </table>
+			</div> <!-- panel-body -->
+		</div> <!-- panel panel-info -->              
+    </div><!-- container --> 
+	<div th:replace="layouts/footer::footer"></div>
+  </body>
+</html>

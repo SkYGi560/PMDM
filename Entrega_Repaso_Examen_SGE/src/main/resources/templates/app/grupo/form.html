@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layouts/header::head"></head>
+
+<body>
+	<div th:replace="layouts/cabecera::cabecera"></div>
+	<nav th:replace="layouts/menu::menu(grupos)"></nav>
+	
+	<div class="container">
+	  <div class="card offset-md-1 col-md-10" th:classappend="${grupoForm.id > 0} ? 'border-primary' : 'border-success'">
+		<div class="card-header" th:classappend="${grupoForm.id > 0} ? 'bg-primary text-white' : 'bg-success text-white'">
+			<h2 th:text="${grupoForm.id > 0} ? 'Editar grupo' : 'Nuevo grupo'"></h2>
+		</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="offset-md-2 col-md-9">
+					<form method="post" action="#" th:object="${grupoForm}"
+					      th:action="${grupoForm.id > 0} ? @{/app/grupo/edit/submit} : @{/app/grupo/new/submit}">
+						<div class="mb-3 row">
+							<input type="hidden" class="form-control" id="id" placeholder="1" th:field="*{id}"
+							       th:attrappend="readonly=${grupoForm.id > 0} ? 'readonly' : null" />
+						</div>
+						<div class="mb-3 row">
+							<label for="grupo" class="col-md-2 control-label">Grupo</label> 
+							<div class="col-md-8">
+								<input type="text" class="form-control" id="grupo" placeholder="Grupo" th:field="*{grupo}" />
+							</div>
+						</div>		
+						<div class="mb-3 row">
+							<label for="ciclo" class="col-md-2 control-label">Ciclo</label> 
+							<div class="col-md-8">
+								<select class="form-control" id="ciclo" th:field="*{ciclo}" >
+									<option	value=""></option>
+									<option value="Desarrollo de Aplicaciones Multiplataforma">Desarrollo de Aplicaciones Multiplataforma</option>
+									<option value="Administración de Sistemas Informáticos en Red">Administración de Sistemas Informáticos en Red</option>
+									<option value="Sistemas Microinformáticos y Redes">Sistemas Microinformáticos y Redes</option>
+								</select>
+							</div>
+						</div>
+						<div class="mb-3 row">
+							<label for="tutor" class="col-md-2 control-label">Tutor</label> 
+							<div class="col-md-8">
+								<select class="form-control" id="tutor" th:field="*{tutor}" >
+									<option	value=""></option>
+									<option	th:each="tutor : ${listaTutores}" th:value="${tutor.nombre}+' '+${tutor.apellidos}" th:text="${tutor.nombre}+' '+${tutor.apellidos}"></option>
+								</select>
+							</div>
+						</div>
+							<div class="mb-3 row">
+								<div class="offset-md-2 col-md-6">
+									<button type="submit" class="btn btn-success">Enviar</button>&nbsp;&nbsp;
+									<a href="/app/grupo/list" class="btn btn-secondary">Volver</a>
+								</div>
+							</div>
+					</form>
+				</div>
+			</div><!-- row -->
+		</div><!-- panel-body -->
+	  </div><!-- panel --> 			
+	</div><!-- container --> 
+	<div th:replace="layouts/footer::footer"></div>
+ </body>
+</html>

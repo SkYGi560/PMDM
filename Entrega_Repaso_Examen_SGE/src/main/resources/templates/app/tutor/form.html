@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layouts/header::head"></head>
+
+<body>
+	<div th:replace="layouts/cabecera::cabecera"></div>
+	<nav th:replace="layouts/menu::menu(tutores)"></nav>
+	
+	<div class="container">
+	  <div class="card offset-md-1 col-md-10" th:classappend="${tutorForm.id > 0} ? 'border-primary' : 'border-success'">
+		<div class="card-header" th:classappend="${tutorForm.id > 0} ? 'bg-primary text-white' : 'bg-success text-white'">
+			<h2 th:text="${tutorForm.id > 0} ? 'Editar tutor' : 'Nuevo tutor'"></h2>
+		</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="offset-md-2 col-md-9">
+					<form method="post" action="#" th:object="${tutorForm}"
+					      th:action="${tutorForm.id > 0} ? @{/app/tutor/edit/submit} : @{/app/tutor/new/submit}">
+						<div class="mb-3 row">
+							<input type="hidden" class="form-control" id="id" placeholder="1" th:field="*{id}"
+							       th:attrappend="readonly=${tutorForm.id > 0} ? 'readonly' : null" />
+						</div>
+						<div class="mb-3 row">
+							<label for="nombre" class="col-md-2 control-label">Nombre</label> 
+							<div class="col-md-8">
+								<input type="text" class="form-control" id="nombre" placeholder="Nombre" th:field="*{nombre}" />
+							</div>
+						</div>					
+						<div class="mb-3 row">
+							<label for="apellidos" class="col-md-2 control-label">Apellidos</label> 
+							<div class="col-md-8">
+								<input type="text" class="form-control" id="apellidos" placeholder="Apellidos" th:field="*{apellidos}" />
+							</div>
+						</div>					
+						<div class="mb-3 row">
+							<label for="email" class="col-md-2 control-label">Email</label> 
+							<div class="col-md-8">	
+								<input type="email"	class="form-control" id="email" placeholder="tutor@iesdoctorbalmis.com" th:field="*{email}" />
+							</div>
+						</div>
+						<div class="mb-3 row">
+							<label for="password" class="col-md-2 control-label">Password</label> 
+							<div class="col-md-8">
+								<input type="password" class="form-control" id="password" placeholder="Password" th:field="*{password}" />
+							</div>
+						</div>
+						<div class="mb-3 row">
+							<div class="offset-md-2 col-md-6">
+								<button type="submit" class="btn btn-success">Enviar</button>
+								<a href="/app/tutor/list" class="btn btn-secondary">Volver</a>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div><!-- row -->
+		</div><!-- panel-body -->
+	  </div><!-- panel --> 			
+	</div><!-- container --> 
+	<div th:replace="layouts/footer::footer"></div>
+ </body>
+</html>

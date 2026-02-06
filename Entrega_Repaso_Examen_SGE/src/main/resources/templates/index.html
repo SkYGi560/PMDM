@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layouts/header::head"></head>
+<body>
+	<div th:replace="layouts/cabecera::cabecera"></div>
+	<nav th:replace="layouts/menu::menu(inicio)"></nav>	
+	<div class="container">
+		<div class="card border-info">
+			<div class="card-header bg-info text-white">
+				<h2>IES Doctor Balmis</h2>		
+			</div>
+			<div class="card-body">
+				<br>
+				<table width="100%" border="0">
+					<tr>
+						<td width="69%">			
+							<h3>El I.E.S Nº 11 de Alicante fue creado el 29 de julio (DOGV/ BOE – 31 agosto 1994) del año 1994 y se ubicó de forma provisional en el edificio de La Aneja, en tanto se construía  el  nuevo edificio. El Consejo escolar del I.E.S. Nº 11 de Alicante aprobó solicitar, en sesión celebrada el 21 de Enero de 2004, la denominación de “Doctor Balmis”.</h3>
+							<h3>Francisco Javier Balmis Berenguer (1753-1819) nació en Alicante y dedicó su vida a la medicina. Fue nombrado por Carlos IV director de la Real Expedición Filantrópica de la Vacuna el día 2 de julio de 1803,  siendo la primera vacunación masiva de la historia y el comienzo de la erradicación de la viruela. Esta expedición recorrió Hispanomérica, Filipinas, Cantón y Macao, con 22 niños del Colegio de los Expósitos de A Coruña y su nodriza Isabel López Sedalla, quienes transportaron la vacuna: cada semana se les iba inyectando a dos de ellos en los brazos de las pústulas de los inoculados la semana anterior. Tras cumplir con éxito su misión, la expedición regresó a España, en septiembre de 1806. La elección de esta denominación por el centro se debe al justo reconocimiento que nuestro Instituto quiere hacer a este afamado alicantino.</h3>
+						</td>
+						<td width="1%"></td>
+						<td width="30%" align="center">
+							<img src="/img/foto_informacion.png" class="img-fluid" width="100%" />
+						</td>
+					</tr>
+				</table>
+				<br>
+			</div>
+		</div>
+    </div><!-- /.container -->
+	<div th:replace="layouts/footer::footer"></div>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layouts/header::head"></head>
+
+<body>
+	<div th:replace="layouts/cabecera::cabecera"></div>
+	<nav th:replace="layouts/menu::menu(alumnos)"></nav>
+	
+	<div class="container">
+	  <div class="card offset-md-1 col-md-10" th:classappend="${alumnoForm.id > 0} ? 'border-primary' : 'border-success'">
+		<div class="card-header" th:classappend="${alumnoForm.id > 0} ? 'bg-primary text-white' : 'bg-success text-white'">
+			<h2 th:text="${alumnoForm.id > 0} ? 'Editar alumno' : 'Nuevo alumno'"></h2>
+		</div>
+		<div class="card-body">
+			<table  width="100%" border="0">
+			  <tr>
+				<td width="45%">
+				  <img th:src="${#strings.isEmpty(alumnoForm.imagen)} ? 'https://placehold.co/400' : ${alumnoForm.imagen}"
+			 		   class="img-fluid mx-auto d-block" alt="Image" style="height: 400px;">
+				</td>
+				<td width="55%">
+				  <div class="row">
+					<div class="offset-md-1 col-md-9">
+						<form method="post" action="#" th:object="${alumnoForm}"
+						      th:action="${alumnoForm.id > 0} ? @{/app/alumno/edit/submit} : @{/app/alumno/new/submit}">	    				    
+							<div class="mb-3 row">
+								<input type="hidden" class="form-control" id="id" placeholder="1" th:field="*{id}"
+								       th:attrappend="readonly=${alumnoForm.id > 0} ? 'readonly' : null" />
+							</div>
+							<div class="mb-3 row">
+								<label for="nombre" class="col-md-2 control-label">Nombre</label> 
+								<div class="col-md-9">
+									<input type="text" class="form-control" id="nombre" placeholder="Nombre" th:field="*{nombre}" />
+								</div>
+							</div>	
+							<div class="mb-3 row">
+								<label for="apellidos" class="col-md-2 control-label">Apellidos</label> 
+								<div class="col-md-9">		
+									<input type="text" class="form-control" id="apellidos" placeholder="Apellidos" th:field="*{apellidos}" />
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label for="email" class="col-md-2 control-label">Email</label> 
+								<div class="col-md-9">
+									<input type="email"	class="form-control" id="email" placeholder="alumno@iesdoctorbalmis.com" th:field="*{email}" />
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label for="grupo" class="col-md-2 control-label">Grupo</label> 
+								<div class="col-md-9">
+									<select class="form-control" id="grupo" th:field="*{grupo}" >
+										<option	value=""></option>
+										<option	th:each="grupo : ${listaGrupos}" th:value="${grupo.grupo}" th:text="${grupo.grupo}"></option>
+									</select>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label for="imagen" class="col-md-2 control-label">Avatar</label> 
+								<div class="col-md-9">
+									<input type="text" class="form-control" id="imagen" placeholder="URL imagen" th:field="*{imagen}" />
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<div class="offset-md-2 col-md-6">
+									<button type="submit" class="btn btn-success">Enviar</button>&nbsp;&nbsp;
+									<a href="/app/alumno/list" class="btn btn-secondary">Volver</a><br>
+								</div>
+							</div>
+						</form>
+					</div>
+				  </div><!-- row -->
+				</td>  
+			  </tr>
+			</table>
+		</div><!-- panel-body -->
+	  </div><!-- panel --> 
+	</div><!-- container -->
+	<div th:replace="layouts/footer::footer"></div>
+ </body>
+</html>

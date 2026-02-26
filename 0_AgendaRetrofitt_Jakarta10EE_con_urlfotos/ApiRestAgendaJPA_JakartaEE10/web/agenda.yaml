@@ -1,0 +1,261 @@
+swagger: "2.0"
+info:
+  title: "API REST Agenda Contactos"
+  description: "Documentación de la API REST para la gestión de contactos en Jakarta EE 10."
+  version: "1.0.0"
+basePath: "/agenda/rest" 
+tags:
+  - name: "Contactos"
+    description: "Operaciones de gestión sobre la entidad Contactos y sus imágenes"
+paths:
+  /contactos:
+    get:
+      tags:
+        - "Contactos"
+      summary: "Obtener todos los contactos"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Operación exitosa. Devuelve la lista de contactos."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Contacto"
+        "204":
+          description: "No hay contenido disponible (lista vacía)."
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+    post:
+      tags:
+        - "Contactos"
+      summary: "Crear un nuevo contacto"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "contacto"
+          description: "Objeto contacto que se va a crear"
+          required: true
+          schema:
+            $ref: "#/definitions/Contacto"
+      responses:
+        "201":
+          description: "Contacto creado exitosamente."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "302":
+          description: "El contacto ya existe."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+    put:
+      tags:
+        - "Contactos"
+      summary: "Actualizar un contacto existente"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "contacto"
+          description: "Objeto contacto con los datos actualizados"
+          required: true
+          schema:
+            $ref: "#/definitions/Contacto"
+      responses:
+        "200":
+          description: "Contacto actualizado correctamente."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "404":
+          description: "No existe contacto con el ID especificado."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+
+  /contactos/count:
+    get:
+      tags:
+        - "Contactos"
+      summary: "Obtener el número total de contactos"
+      produces:
+        - "text/plain"
+      responses:
+        "200":
+          description: "Conteo de contactos"
+          schema:
+            type: "integer"
+            format: "int64"
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+
+  /contactos/{id}:
+    get:
+      tags:
+        - "Contactos"
+      summary: "Obtener un contacto específico por su ID"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID del contacto a recuperar"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Detalle del contacto solicitado."
+          schema:
+            $ref: "#/definitions/Contacto"
+        "404":
+          description: "No existe contacto con el ID especificado."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+    delete:
+      tags:
+        - "Contactos"
+      summary: "Eliminar un contacto y su imagen asociada"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID del contacto a eliminar"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Contacto eliminado correctamente."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "404":
+          description: "No existe contacto con el ID especificado."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "400":
+          description: "Error al procesar la petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+
+  /contactos/uploadfoto/{id}:
+    patch:
+      tags:
+        - "Contactos"
+      summary: "Subir foto de un contacto enviándola en formato Base64"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID del contacto al que se asignará la imagen"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "datosImagen"
+          description: "Extensión e imagen codificada en Base64"
+          required: true
+          schema:
+            $ref: "#/definitions/DotosImagen"
+      responses:
+        "200":
+          description: "Imagen subida y asociada correctamente. Retorna la URL generada."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "400":
+          description: "Faltan datos de la imagen, formato incorrecto o error en petición."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "404":
+          description: "No existe contacto con el ID especificado."
+          schema:
+            $ref: "#/definitions/Mensaje"
+        "500":
+          description: "Error al crear el directorio de imágenes."
+          schema:
+            $ref: "#/definitions/Mensaje"
+
+  /contactos/{nombreImagen}:
+    get:
+      tags:
+        - "Contactos"
+      summary: "Obtener archivo binario de la imagen de un contacto"
+      description: "Recibe el nombre del archivo de imagen y la devuelve con su Mime Type dinámico."
+      produces:
+        - "image/jpeg"
+        - "image/png"
+        - "image/gif"
+        - "image/webp"
+        - "image/bmp"
+        - "application/octet-stream"
+      parameters:
+        - name: "nombreImagen"
+          in: "path"
+          description: "Nombre de la imagen almacenada en el servidor (ej. id000001.png)"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Archivo de imagen binario"
+          schema:
+            type: "file"
+        "404":
+          description: "La imagen no existe."
+        "500":
+          description: "Error procesando el archivo de imagen."
+          schema:
+            $ref: "#/definitions/Mensaje"
+
+definitions:
+  Contacto:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "ID único del contacto"
+      nombre:
+        type: "string"
+      apellidos:
+        type: "string"
+      email:
+        type: "string"
+      telefono:
+        type: "string"
+      urlFoto:
+        type: "string"
+        description: "Enlace generado donde se aloja la foto"
+  Mensaje:
+    type: "object"
+    properties:
+      mensaje:
+        type: "string"
+        description: "Texto descriptivo del resultado de la operación o del error"
+  DotosImagen:
+    type: "object"
+    description: "Modelo de los datos necesarios para subir la imagen a base64"
+    properties:
+      extension:
+        type: "string"
+        description: "Extensión del archivo (ej. jpg, png, webp)"
+      base64Image:
+        type: "string"
+        description: "El contenido crudo de la imagen convertido a string en Base64"

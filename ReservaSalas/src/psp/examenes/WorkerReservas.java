@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class WorkerReservas extends Thread {
 
@@ -23,14 +25,20 @@ public class WorkerReservas extends Thread {
     Boolean conexionActiva;
     Estados estadoActual;
     String usuarioActual;
+    public final ArrayList<Sala> salas;
+    public final HashMap<String, String> reservas;
+    public final ArrayList<String> usuariosConectados;
 
     private enum Estados {
         INICIO, AUTENTICADO, FIN
     }
 
-    public WorkerReservas(Socket socket) {
+    public WorkerReservas(Socket socket, ArrayList<Sala> salas, HashMap<String, String> reservas, ArrayList<String> usuariosConectados) {
         this.socketCliente = socket;
         conexionActiva = true;
+        this.reservas = reservas;
+        this.salas = salas;
+        this.usuariosConectados = usuariosConectados;
     }
 
     // ****************************************************************
@@ -64,7 +72,7 @@ public class WorkerReservas extends Thread {
         estadoActual = Estados.INICIO;
 
         try {
-            do {
+            while (conexionActiva) {
                 entradas = entrada.readLine().split("\\|");
                 comando = entradas[0];
                 switch (estadoActual) {
@@ -76,6 +84,8 @@ public class WorkerReservas extends Thread {
                                 manejarListReservas();
                             case "LOGIN" ->
                                 manejarLogin();
+                            case "EXIT", "SALIR" ->
+                                manejarSalir();
                             default ->
                                 salida.println("UNEXPECTED_CMD");
                         }
@@ -101,15 +111,20 @@ public class WorkerReservas extends Thread {
                         }
                     }
                 }
-            } while (conexionActiva);
+            }
         } catch (IOException ex) {
             System.getLogger(WorkerReservas.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
 
     private void manejarLogin() {
-        System.out.println("--> Cliente: LOGIN|" + entradas[1]);
         usuarioActual = entradas[1];
+        System.out.println("--> Cliente: LOGIN|" + usuarioActual);
+        synchronized (usuariosConectados) {
+            if (!usuariosConectados.contains(usuarioActual)) {
+                usuariosConectados.add(usuarioActual);
+            }
+        }
         estadoActual = Estados.AUTENTICADO;
         salida.println("OK");
         System.out.println("El usuario " + entradas[1] + " ha entrado en el sistema.");
@@ -119,24 +134,27 @@ public class WorkerReservas extends Thread {
     /* LIST_SALAS */
     private void manejarListSalas() {
         salidaPantalla = "SALAS";
-        for (var sala : ServidorReservas.salas) {
-            salidaPantalla += "|" + sala.toString();
+        synchronized (salas) {
+            for (var sala : salas) {
+                salidaPantalla += "|" + sala.toString();
+            }
         }
         salida.println(salidaPantalla);
         System.out.println("--> Cliente: LIST_SALAS");
-        System.out.println("Se envía el listado de " + ServidorReservas.salas.size() + " salas al usuario.");
+        System.out.println("Se envía el listado de " + salas.size() + " salas al usuario.");
     }
 
     /* LIST_RESERVAS */
     private void manejarListReservas() {
         System.out.println("--> Cliente: LIST_RESERVAS");
         String salidaConsola = "";
-        for (var reserva : ServidorReservas.reservas.entrySet()) {
-            salida.println("RESERVAS|" + reserva.getKey() + "," + reserva.getValue());
-            salidaConsola += reserva.getKey() + " (" + reserva.getValue() + "),";
+        synchronized (reservas) {
+            for (var reserva : reservas.entrySet()) {
+                salida.println("RESERVAS|" + reserva.getKey() + "," + reserva.getValue());
+                salidaConsola += reserva.getKey() + " (" + reserva.getValue() + "),";
+            }
         }
         salida.println("RESERVAS|NONE");
-
         System.out.println("Se envía el listado de reservas: " + salidaConsola);
     }
 
@@ -146,20 +164,21 @@ public class WorkerReservas extends Thread {
         String nombreUsuario = entradas[1];
         String codigoSala = entradas[2];
         Boolean disponible = false;
-        for (Sala sala : ServidorReservas.salas) {
-            if (sala.getCodigo().equals(codigoSala) && !ServidorReservas.reservas.containsKey(codigoSala)) {
-                disponible = true;
+        synchronized (salas) {
+            for (Sala sala : ServidorReservas.salas) {
+                if (sala.getCodigo().equals(codigoSala) && !reservas.containsKey(codigoSala)) {
+                    disponible = true;
+                }
+            }
+            if (disponible) {
+                reservas.put(codigoSala, nombreUsuario);
+                System.out.println("La sala " + entradas[2] + " ha sido reservada por el usuario " + entradas[1] + ".");
+                salida.println("OK");
+            } else {
+                salida.println("KO");
+                System.out.println("No se puede ocupar la sala " + entradas[2] + " para " + entradas[1] + "(ocupada o inexistente)");
             }
         }
-        if (disponible) {
-            ServidorReservas.reservas.put(codigoSala, nombreUsuario);
-            System.out.println("La sala " + entradas[2] + " ha sido reservada por el usuario " + entradas[1] + ".");
-            salida.println("OK");
-        } else {
-            salida.println("KO");
-            System.out.println("No se puede ocupar la sala " + entradas[2] + " para " + entradas[1] + "(ocupada o inexistente)");
-        }
-
     }
 
     /* CANCELAR|usuario|codigoSala */
@@ -168,20 +187,21 @@ public class WorkerReservas extends Thread {
         String nombreUsuario = entradas[1];
         String codigoSala = entradas[2];
         Boolean disponible = false;
-        for (String reserva : ServidorReservas.reservas.keySet()) {
-            if (reserva.equals(codigoSala)) {
-                disponible = true;
+        synchronized (reservas) {
+            for (String reserva : reservas.keySet()) {
+                if (reserva.equals(codigoSala)) {
+                    disponible = true;
+                }
+            }
+            if (disponible) {
+                reservas.remove(codigoSala);
+                salida.println("OK");
+                System.out.println("La reserva de la sala " + entradas[2] + " del usuario " + entradas[1] + " ha sido eliminada.");
+            } else {
+                salida.println("KO");
+                System.out.println("No existe reserva de la sala " + entradas[2] + " para el usuario " + entradas[1] + ".");
             }
         }
-        if (disponible) {
-            ServidorReservas.reservas.remove(codigoSala);
-            salida.println("OK");
-            System.out.println("La reserva de la sala " + entradas[2] + " del usuario " + entradas[1] + " ha sido eliminada.");
-        } else {
-            salida.println("KO");
-            System.out.println("No existe reserva de la sala " + entradas[2] + " para el usuario " + entradas[1] + ".");
-        }
-
     }
 
     /* SALIR / EXIT */

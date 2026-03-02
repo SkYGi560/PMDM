@@ -34,9 +34,9 @@ public class ServidorReservas {
             while (true) {
                 socketCliente = socketServidor.accept();
                 System.out.println("Conexión aceptada: " + socketCliente);
-                new WorkerReservas(socketCliente).start();
+                new WorkerReservas(socketCliente, salas, reservas,usuariosConectados).start();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error en servidor: " + e.getMessage());
         }
     }

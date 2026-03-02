@@ -241,6 +241,7 @@ public class ClienteReservas {
 
     private void comandoSalir() throws IOException {
         System.out.println("Introduce comando: EXIT");
+        salida.println("EXIT");
         System.out.println("Sesión finalizada. Gracias por usar el sistema de reservas.");
     }
 
